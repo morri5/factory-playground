@@ -14,6 +14,9 @@ python3 -m ledgerlite categories ledger.csv
 python3 -m ledgerlite export ledger.csv sorted.csv
 ```
 
+The exported file begins with the same `date,amount,category,description` header, so
+it is itself a valid ledger file that can be passed back to any `ledgerlite` command.
+
 ## Development
 
 ```

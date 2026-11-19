@@ -44,6 +44,18 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("wrote 3 entries", text)
 
+    def test_export_output_can_be_read_back(self) -> None:
+        out = self.dir / "out.csv"
+        code, _ = self.run_cli("export", str(self.file), str(out))
+        self.assertEqual(code, 0)
+        self.assertEqual(
+            out.read_text().splitlines()[0], "date,amount,category,description"
+        )
+        code, text = self.run_cli("summary", str(out))
+        self.assertEqual(code, 0)
+        self.assertIn("2026-01", text)
+        self.assertIn("42.00", text)
+
     def test_missing_file(self) -> None:
         code, out = self.run_cli("summary", str(self.dir / "nope.csv"))
         self.assertEqual(code, 1)
