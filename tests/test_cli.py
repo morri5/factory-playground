@@ -35,6 +35,35 @@ class CliTest(unittest.TestCase):
         self.assertIn("42.00", out)
         self.assertIn("transport", out)
 
+    def test_summary_filters_by_category(self) -> None:
+        code, out = self.run_cli("summary", str(self.file), "--category", "food")
+        self.assertEqual(code, 0)
+        self.assertIn("Per month", out)
+        self.assertIn("Per category", out)
+        self.assertIn("2026-01", out)
+        self.assertIn("12.00", out)
+        self.assertIn("2026-02", out)
+        self.assertIn("5.00", out)
+        self.assertIn("food", out)
+        self.assertIn("17.00", out)
+        self.assertNotIn("transport", out)
+        self.assertNotIn("30.00", out)
+        self.assertNotIn("42.00", out)
+
+    def test_summary_category_filter_ignores_case_and_argument_order(self) -> None:
+        code, after = self.run_cli("summary", str(self.file), "--category", "food")
+        self.assertEqual(code, 0)
+        code, before = self.run_cli("summary", "--category", "FOOD", str(self.file))
+        self.assertEqual(code, 0)
+        self.assertEqual(before, after)
+
+    def test_summary_unknown_category_is_empty(self) -> None:
+        code, out = self.run_cli("summary", str(self.file), "--category", "nope")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.count("(no entries)"), 2)
+        self.assertNotIn("food", out)
+        self.assertNotIn("transport", out)
+
     def test_categories(self) -> None:
         self.assertEqual(self.run_cli("categories", str(self.file)), (0, "food\ntransport\n"))
 
