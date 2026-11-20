@@ -1,5 +1,7 @@
 import contextlib
 import io
+import subprocess
+import sys
 import tempfile
 import unittest
 from decimal import Decimal
@@ -31,6 +33,8 @@ class CliTest(unittest.TestCase):
         self.dir = Path(tmp.name)
         self.file = self.dir / "ledger.csv"
         self.file.write_text(LEDGER)
+        self.empty = self.dir / "empty.csv"
+        self.empty.write_text("")
 
     def run_cli(self, *args: str) -> tuple[int, str]:
         out = io.StringIO()
@@ -86,6 +90,39 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("2026-01", text)
         self.assertIn("42.00", text)
+
+    def test_summary_of_empty_file(self) -> None:
+        code, out = self.run_cli("summary", str(self.empty))
+        self.assertEqual(code, 0)
+        self.assertIn("Per month\n(no entries)", out)
+        self.assertIn("Per category\n(no entries)", out)
+
+    def test_categories_of_empty_file(self) -> None:
+        self.assertEqual(self.run_cli("categories", str(self.empty)), (0, "\n"))
+
+    def test_export_of_empty_file(self) -> None:
+        out = self.dir / "empty-out.csv"
+        code, text = self.run_cli("export", str(self.empty), str(out))
+        self.assertEqual(code, 0)
+        self.assertIn("wrote 0 entries", text)
+        self.assertEqual(
+            out.read_text().splitlines(), ["date,amount,category,description"]
+        )
+        code, text = self.run_cli("summary", str(out))
+        self.assertEqual(code, 0)
+        self.assertIn("(no entries)", text)
+
+    def test_empty_file_does_not_crash_the_process(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        result = subprocess.run(
+            [sys.executable, "-m", "ledgerlite", "summary", str(self.empty)],
+            capture_output=True,
+            text=True,
+            cwd=repo_root,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertIn("(no entries)", result.stdout)
 
     def test_missing_file(self) -> None:
         code, out = self.run_cli("summary", str(self.dir / "nope.csv"))

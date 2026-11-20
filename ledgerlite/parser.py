@@ -32,7 +32,9 @@ def parse_line(row: dict[str, str], line: int) -> Entry:
 def read_entries(path: Path) -> list[Entry]:
     with path.open(newline="") as f:
         reader = csv.reader(f)
-        header = next(reader)
+        header = next(reader, None)
+        if header is None:
+            return []
         if [h.strip().lower() for h in header] != COLUMNS:
             raise ParseError(f"expected header {','.join(COLUMNS)}, got {','.join(header)}")
         return [
