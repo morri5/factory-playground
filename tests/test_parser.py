@@ -30,6 +30,15 @@ class ReadEntriesTest(unittest.TestCase):
         path = self.write("date,amount,category,description\n\n2026-01-03,1,food,\n")
         self.assertEqual(len(read_entries(path)), 1)
 
+    def test_empty_file_has_no_entries(self) -> None:
+        path = self.write("")
+        self.assertEqual(read_entries(path), [])
+
+    def test_rejects_file_with_only_a_blank_line(self) -> None:
+        path = self.write("\n")
+        with self.assertRaises(ParseError):
+            read_entries(path)
+
     def test_rejects_wrong_header(self) -> None:
         path = self.write("when,how much\n2026-01-03,1\n")
         with self.assertRaises(ParseError):
