@@ -49,6 +49,12 @@ class CliTest(unittest.TestCase):
         self.assertIn("42.00", out)
         self.assertIn("transport", out)
 
+    def test_summary_ends_with_total(self) -> None:
+        code, out = self.run_cli("summary", str(self.file))
+        self.assertEqual(code, 0)
+        self.assertIn("Per category", out)
+        self.assertEqual(out.splitlines()[-1].split(), ["Total", "47.00"])
+
     def test_summary_filters_by_category(self) -> None:
         code, out = self.run_cli("summary", str(self.file), "--category", "food")
         self.assertEqual(code, 0)
@@ -98,6 +104,32 @@ class CliTest(unittest.TestCase):
         )
         self.assertIn("clothing", category_table)
         self.assertIn("-37.50", category_table)
+
+    def test_summary_total_respects_category_filter(self) -> None:
+        code, out = self.run_cli("summary", str(self.file), "--category", "food")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.splitlines()[-1].split(), ["Total", "17.00"])
+        self.assertNotIn("47.00", out)
+
+    def test_summary_total_includes_refunds(self) -> None:
+        refund_file = self.dir / "refunds.csv"
+        refund_file.write_text(REFUND_LEDGER)
+        code, out = self.run_cli("summary", str(refund_file))
+        self.assertEqual(code, 0)
+        self.assertEqual(out.splitlines()[-1].split(), ["Total", "-20.25"])
+
+    def test_summary_of_empty_file_has_zero_total(self) -> None:
+        code, out = self.run_cli("summary", str(self.empty))
+        self.assertEqual(code, 0)
+        self.assertIn("Per month\n(no entries)", out)
+        self.assertIn("Per category\n(no entries)", out)
+        self.assertEqual(out.splitlines()[-1].split(), ["Total", "0.00"])
+
+    def test_summary_unknown_category_has_zero_total(self) -> None:
+        code, out = self.run_cli("summary", str(self.file), "--category", "nope")
+        self.assertEqual(code, 0)
+        self.assertEqual(out.count("(no entries)"), 2)
+        self.assertEqual(out.splitlines()[-1].split(), ["Total", "0.00"])
 
     def test_categories(self) -> None:
         self.assertEqual(self.run_cli("categories", str(self.file)), (0, "food\ntransport\n"))

@@ -9,6 +9,8 @@ The code is `ledgerlite`, a CSV expense ledger with categories, monthly totals a
 The ledger is a CSV file with the columns `date,amount,category,description`. A negative amount is a refund.
 
 Totals are net: a refund reduces both the month and the category it belongs to.
+The summary ends with a `Total` line holding the net sum of every entry it showed;
+with `--category`, that is the net sum of the filtered entries only.
 
 ```
 python3 -m ledgerlite summary ledger.csv
