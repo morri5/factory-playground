@@ -12,7 +12,7 @@ from ledgerlite.parser import ParseError, read_entries
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="ledgerlite", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    summary = commands.add_parser("summary", help="totals per month and per category")
+    summary = commands.add_parser("summary", help="totals per month, per category, and an overall total")
     summary.add_argument("file", type=Path)
     summary.add_argument(
         "--category",
@@ -36,9 +36,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if args.command == "summary":
         shown = ledger.in_category(args.category) if args.category else ledger
+        total = reports.grand_total(shown)
         print(formatting.table(reports.monthly_totals(shown), "Per month"))
         print()
-        print(formatting.table(reports.category_totals(shown), "Per category"))
+        print(formatting.table(reports.category_totals(shown), "Per category", total=total))
     elif args.command == "categories":
         print("\n".join(ledger.categories()))
     elif args.command == "export":

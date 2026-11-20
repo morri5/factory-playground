@@ -2,7 +2,7 @@ import unittest
 from decimal import Decimal
 
 from ledgerlite.ledger import Ledger
-from ledgerlite.reports import category_totals, monthly_totals
+from ledgerlite.reports import category_totals, grand_total, monthly_totals
 from tests.helpers import entry
 
 
@@ -54,6 +54,34 @@ class ReportsTest(unittest.TestCase):
         self.assertEqual(
             sum(monthly_totals(ledger).values(), Decimal("0")),
             sum(category_totals(ledger).values(), Decimal("0")),
+        )
+
+    def test_grand_total(self) -> None:
+        ledger = Ledger(
+            [
+                entry("2026-01-02", "12", "food"),
+                entry("2026-01-15", "30", "clothing"),
+                entry("2026-01-20", "-60", "clothing"),
+                entry("2026-02-01", "5.25", "food"),
+            ]
+        )
+        self.assertEqual(grand_total(ledger), Decimal("-12.75"))
+
+    def test_grand_total_of_empty_ledger(self) -> None:
+        self.assertEqual(grand_total(Ledger()), Decimal("0"))
+
+    def test_grand_total_matches_monthly_totals(self) -> None:
+        ledger = Ledger(
+            [
+                entry("2026-01-02", "12", "food"),
+                entry("2026-01-15", "30", "clothing"),
+                entry("2026-01-20", "-60", "clothing"),
+                entry("2026-02-01", "5.25", "food"),
+            ]
+        )
+        self.assertEqual(
+            grand_total(ledger),
+            sum(monthly_totals(ledger).values(), Decimal("0")),
         )
 
     def test_monthly_totals_keep_zero_amounts(self) -> None:

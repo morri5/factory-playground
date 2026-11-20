@@ -7,9 +7,18 @@ def money(amount: Decimal) -> str:
     return f"{amount:,.2f}"
 
 
-def table(rows: dict[str, Decimal], title: str) -> str:
-    if not rows:
-        return f"{title}\n(no entries)"
-    width = max(len(key) for key in rows)
-    lines = [title] + [f"{key.ljust(width)}  {money(value):>12}" for key, value in rows.items()]
+def table(
+    rows: dict[str, Decimal], title: str, total: Decimal | None = None
+) -> str:
+    width = max((len(key) for key in rows), default=0)
+    if total is not None:
+        width = max(width, len("Total"))
+    if rows:
+        lines = [title] + [
+            f"{key.ljust(width)}  {money(value):>12}" for key, value in rows.items()
+        ]
+    else:
+        lines = [title, "(no entries)"]
+    if total is not None:
+        lines.append(f"{'Total'.ljust(width)}  {money(total):>12}")
     return "\n".join(lines)
