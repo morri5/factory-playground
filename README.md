@@ -24,6 +24,8 @@ case-insensitive, so `--category Food` and `--category food` are equivalent.
 
 The exported file begins with the same `date,amount,category,description` header, so
 it is itself a valid ledger file that can be passed back to any `ledgerlite` command.
+Amounts are written with exactly two decimal places, without thousands separators;
+an amount carrying more precision is rounded to two decimals.
 
 ## Development
 

@@ -11,13 +11,19 @@ def write_csv(ledger: Ledger, path: Path) -> int:
     """Write the entries to `path`; returns how many were written.
 
     The header row is written first, so the file is a valid ledger that
-    `read_entries` can read back.
+    `read_entries` can read back. Amounts are written with exactly two
+    decimal places and no thousands separators.
     """
     with path.open("w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(COLUMNS)
         for entry in ledger.entries:
             writer.writerow(
-                [entry.date.isoformat(), str(entry.amount), entry.category, entry.description]
+                [
+                    entry.date.isoformat(),
+                    f"{entry.amount:.2f}",
+                    entry.category,
+                    entry.description,
+                ]
             )
     return len(ledger.entries)
