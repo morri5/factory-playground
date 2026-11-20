@@ -14,6 +14,11 @@ def build_parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
     summary = commands.add_parser("summary", help="totals per month and per category")
     summary.add_argument("file", type=Path)
+    summary.add_argument(
+        "--category",
+        metavar="CATEGORY",
+        help="only include entries in this category (case-insensitive)",
+    )
     categories = commands.add_parser("categories", help="list the categories in use")
     categories.add_argument("file", type=Path)
     exporter = commands.add_parser("export", help="write the ledger, sorted by date, to CSV")
@@ -30,9 +35,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     if args.command == "summary":
-        print(formatting.table(reports.monthly_totals(ledger), "Per month"))
+        shown = ledger.in_category(args.category) if args.category else ledger
+        print(formatting.table(reports.monthly_totals(shown), "Per month"))
         print()
-        print(formatting.table(reports.category_totals(ledger), "Per category"))
+        print(formatting.table(reports.category_totals(shown), "Per category"))
     elif args.command == "categories":
         print("\n".join(ledger.categories()))
     elif args.command == "export":

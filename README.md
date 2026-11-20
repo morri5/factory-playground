@@ -12,9 +12,13 @@ Totals are net: a refund reduces both the month and the category it belongs to.
 
 ```
 python3 -m ledgerlite summary ledger.csv
+python3 -m ledgerlite summary ledger.csv --category food
 python3 -m ledgerlite categories ledger.csv
 python3 -m ledgerlite export ledger.csv sorted.csv
 ```
+
+`--category` restricts both summary tables to a single category. Matching is
+case-insensitive, so `--category Food` and `--category food` are equivalent.
 
 The exported file begins with the same `date,amount,category,description` header, so
 it is itself a valid ledger file that can be passed back to any `ledgerlite` command.
