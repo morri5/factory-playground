@@ -1,6 +1,6 @@
 """Totals per month, per category, and overall."""
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from decimal import Decimal
 
 from ledgerlite.ledger import Ledger
@@ -20,6 +20,12 @@ def category_totals(ledger: Ledger) -> dict[str, Decimal]:
     for entry in ledger.entries:
         totals[entry.category] += entry.amount
     return dict(sorted(totals.items(), key=lambda item: item[1], reverse=True))
+
+
+def category_counts(ledger: Ledger) -> dict[str, int]:
+    """Number of entries per category, alphabetically by category."""
+    counts = Counter(entry.category for entry in ledger.entries)
+    return dict(sorted(counts.items()))
 
 
 def grand_total(ledger: Ledger) -> Decimal:

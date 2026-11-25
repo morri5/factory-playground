@@ -41,7 +41,7 @@ def main(argv: list[str] | None = None) -> int:
         print()
         print(formatting.table(reports.category_totals(shown), "Per category", total=total))
     elif args.command == "categories":
-        print("\n".join(ledger.categories()))
+        print(formatting.counts(reports.category_counts(ledger)))
     elif args.command == "export":
         count = export.write_csv(ledger, args.out)
         print(f"wrote {count} entries to {args.out}")

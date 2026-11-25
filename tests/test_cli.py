@@ -132,7 +132,18 @@ class CliTest(unittest.TestCase):
         self.assertEqual(out.splitlines()[-1].split(), ["Total", "0.00"])
 
     def test_categories(self) -> None:
-        self.assertEqual(self.run_cli("categories", str(self.file)), (0, "food\ntransport\n"))
+        self.assertEqual(
+            self.run_cli("categories", str(self.file)),
+            (0, "food       2\ntransport  1\n"),
+        )
+
+    def test_categories_count_refunds_as_entries(self) -> None:
+        refund_file = self.dir / "refunds.csv"
+        refund_file.write_text(REFUND_LEDGER)
+        self.assertEqual(
+            self.run_cli("categories", str(refund_file)),
+            (0, "clothing  3\nfood      2\n"),
+        )
 
     def test_export(self) -> None:
         out = self.dir / "out.csv"
