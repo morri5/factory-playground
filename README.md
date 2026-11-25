@@ -22,6 +22,10 @@ python3 -m ledgerlite export ledger.csv sorted.csv
 `--category` restricts both summary tables to a single category. Matching is
 case-insensitive, so `--category Food` and `--category food` are equivalent.
 
+The `categories` command lists every category in use, alphabetically, followed by the
+number of entries in that category, for example `food  3`. Refund rows are entries and
+are counted like any other row.
+
 The exported file begins with the same `date,amount,category,description` header, so
 it is itself a valid ledger file that can be passed back to any `ledgerlite` command.
 Amounts are written with exactly two decimal places, without thousands separators;

@@ -22,3 +22,13 @@ def table(
     if total is not None:
         lines.append(f"{'Total'.ljust(width)}  {money(total):>12}")
     return "\n".join(lines)
+
+
+def counts(rows: dict[str, int]) -> str:
+    """One `name  count` line per row, with both columns aligned."""
+    width = max((len(key) for key in rows), default=0)
+    count_width = max((len(str(value)) for value in rows.values()), default=0)
+    return "\n".join(
+        f"{key.ljust(width)}  {str(value).rjust(count_width)}"
+        for key, value in rows.items()
+    )
